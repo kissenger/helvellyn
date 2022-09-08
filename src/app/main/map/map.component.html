@@ -1,4 +1,6 @@
 
+
+
 <div class="row m-0 p-0 h-100">
 
   <div class="col-8 border h-100">
@@ -7,6 +9,11 @@
 
   <div class = "col-4">
     <button class="btn btn-sm btn-primary btn-block" type="submit" (click)="onNewPolyPress()">Create New Polygon</button>
-    <app-details></app-details>
+    <hr>
+    <app-new-polygon *ngIf="isNewPoly" (notifyParent)="cancelNewPoly($event)"></app-new-polygon>
+
+    <app-details *ngIf="isNewPoly===false"></app-details>
   </div>
 </div>
+
+

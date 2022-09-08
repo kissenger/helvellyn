@@ -117,12 +117,14 @@ export class MapService {
       this.tsMap.once('draw.create', (e) => {
         this.tsMap.removeControl(this.drawInstance);
         res(e.features);
-
-
       });
     })
 
 
+  }
+
+  cancelDrawPolygon() {
+    this.tsMap.removeControl(this.drawInstance);
   }
 
   // adds a polygon and deletes the MapboxDraw poygon if the id is supplied
