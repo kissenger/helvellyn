@@ -8,9 +8,18 @@
   </div>
 
   <div class = "col-4">
-    <button class="btn btn-sm btn-primary btn-block" type="submit" (click)="onNewPolyPress()">Create New Polygon</button>
-    <hr>
-    <app-new-polygon *ngIf="isNewPoly" (notifyParent)="cancelNewPoly($event)"></app-new-polygon>
+
+    <div *ngIf="isNewPoly===false">
+      <button class="btn btn-sm btn-primary btn-block" type="submit" (click)="onNewPolyPress()">Create New Polygon</button>
+      <hr>
+    </div>
+
+
+    <app-new-polygon *ngIf="isNewPoly"
+      (notifySubmit)="confirmNewPoly($event)"
+      (notifyCancel)="cancelNewPoly()"
+      notifyDrawingComplete = {{isDrawingComplete}}>
+    </app-new-polygon>
 
     <app-details *ngIf="isNewPoly===false"></app-details>
   </div>

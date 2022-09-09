@@ -1,5 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-// import { DataService } from 'src/app/shared/services/data.service';
+import { Component, EventEmitter, OnInit, Output, Input } from '@angular/core';
 
 @Component({
   selector: 'app-new-polygon',
@@ -8,19 +7,29 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 })
 export class NewPolygonComponent implements OnInit {
 
-  @Output() notifyParent: EventEmitter<any> = new EventEmitter();
+  @Input() notifyDrawingComplete: string;
+  @Output() notifySubmit: EventEmitter<any> = new EventEmitter();
+  @Output() notifyCancel: EventEmitter<any> = new EventEmitter();
+
+  public polyName: string = '';
+  // public enableSubmit: boolean = false;
 
   constructor(
-    // public data: DataService
   ) { }
 
   ngOnInit() {
-    console.log("wefew");
   }
 
-  onCancelPress() {
-    console.log("biuo");
-    this.notifyParent.emit('pants');
+  enableSubmit() {
+    return (this.notifyDrawingComplete === 'false' || this.polyName.length === 0);
+  }
+
+  onSubmit() {
+    this.notifySubmit.emit(this.polyName);
+  }
+
+  onCancel() {
+    this.notifyCancel.emit();
   }
 
 }

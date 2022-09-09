@@ -1,1 +1,12 @@
-<button class="btn btn-sm btn-primary btn-block" type="cancel" (click)="onCancelPress()">Cancel</button>
+
+Use map to define new polygon<p></p>
+<div class="mx-1">Give your new polygon a name: </div>
+<div class="input-group input-group-sm m-1">
+  <input
+    class='form-control'
+    type='text'
+    [(ngModel)]="polyName"
+    name="polyName">
+</div>
+<button class="btn btn-sm btn-primary btn-block m-1" type="submit" (click)="onSubmit()" [disabled]="enableSubmit()">Submit</button>
+<button class="btn btn-sm btn-secondary btn-block m-1" type="cancel" (click)="onCancel()">Cancel</button>

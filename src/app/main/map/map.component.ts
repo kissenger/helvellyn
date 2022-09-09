@@ -13,7 +13,9 @@ import { DataService } from 'src/app/shared/services/data.service';
 export class MapComponent implements OnInit {
 
   public isNewPoly = false;
+  public isDrawingComplete:boolean = false;
   public cancelPolySubscription: Subscription;
+  private polyFeature: TsFeature;
 
   constructor(
     public map: MapService,
@@ -24,25 +26,26 @@ export class MapComponent implements OnInit {
     await this.map.newMap();
   }
 
+  // When user initiates new polygon, enable the new polygin component, and initiate draw
+  // when draw is complete, let the child component know that button can be submitted
   async onNewPolyPress() {
-
+    this.isDrawingComplete = false;
     this.isNewPoly = true;
+    this.polyFeature = await this.map.drawPolygon();
+    this.isDrawingComplete = true;
+  }
 
-    const feature: TsFeature = await this.map.drawPolygon();
+  cancelNewPoly() {
+    this.isNewPoly = false;
+    this.map.removeDrawnPolygon();
+  }
 
+  confirmNewPoly(polyName: string) {
+    this.isNewPoly = false;
+    this.map.removeDrawnPolygon();
     this.map.addPolygonSource({
       type: 'FeatureCollection',
-      features: feature
+      features: this.polyFeature
     });
-
   }
-
-  cancelNewPoly(event) {
-    console.log("gu")
-    console.log(event)
-    this.isNewPoly = false;
-    this.map.cancelDrawPolygon();
-
-  }
-
 }

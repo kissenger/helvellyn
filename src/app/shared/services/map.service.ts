@@ -109,31 +109,22 @@ export class MapService {
   }
 
   drawPolygon() {
-
     return new Promise<TsFeature>((res, rej) => {
-
       this.tsMap.addControl(this.drawInstance);
-
       this.tsMap.once('draw.create', (e) => {
-        this.tsMap.removeControl(this.drawInstance);
         res(e.features);
       });
     })
-
-
   }
 
-  cancelDrawPolygon() {
+  removeDrawnPolygon() {
     this.tsMap.removeControl(this.drawInstance);
   }
 
   // adds a polygon and deletes the MapboxDraw poygon if the id is supplied
   addPolygonSource(data) {
 
-    console.log(data);
     const layerId = data.features[0].id;
-    console.log(layerId);
-
     this.tsMap.addSource(layerId, {type: 'geojson', data});
     this.tsMap.addLayer({
       id: layerId,
@@ -144,7 +135,6 @@ export class MapService {
         'line-width': 3
       }
     });
-
 
   }
 
