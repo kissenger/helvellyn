@@ -7,6 +7,6 @@ import { EventEmitter, Injectable } from '@angular/core';
 
 export class DataService {
 
-  public cancelPolygonEmitter = new EventEmitter();
+  public mapBoundsEmitter = new EventEmitter();
 
 }

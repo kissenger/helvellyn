@@ -16,8 +16,8 @@
 
 
     <app-new-polygon *ngIf="isNewPoly"
-      (notifySubmit)="confirmNewPoly($event)"
-      (notifyCancel)="cancelNewPoly()"
+      (notifySubmit)="newPolyConfirmed($event)"
+      (notifyCancel)="newPolyCancelled()"
       notifyDrawingComplete = {{isDrawingComplete}}>
     </app-new-polygon>
 

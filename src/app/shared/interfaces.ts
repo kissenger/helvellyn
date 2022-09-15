@@ -1,7 +1,10 @@
 
+
 /**
  * Map display options
  */
+
+import { StringMap } from "@angular/compiler/src/compiler_facade_interface";
 
 export interface TsLineStyle {
     lineWidth?: number;
@@ -39,13 +42,28 @@ export interface TsUser {
  * Also see spec: https://tools.ietf.org/html/rfc7946
  */
 
+
+ export interface TsFeatureCollection {
+  type: 'FeatureCollection';
+  features: TsFeature[];
+  // bbox?: TsBoundingBox;
+}
+
+export interface TsFeature {
+  // bbox?: TsBoundingBox;
+  id?: string; // mapbox
+  type: 'Feature';
+  geometry: TsGeometry;
+  properties: TsProperties | null;
+}
+
 // TsPosition provides a position as array of numbers in format [lng, lat]
-export type TsPosition = [number, number];
+export type TsPosition = number[];
 
 export type TsGeometry = TsPoint | TsLineString | TsPolygon;
 
 // TsPoint defines a point in geoJSON format
-export interface TsPoint {
+export interface TsPoint{
   type: 'Point';
   coordinates: TsPosition;
 }
@@ -65,22 +83,24 @@ export interface TsPolygon{
 // TsBoundingBox provides a boundingbox array in the form [minLng, minLat, maxLng, maxLng]
 export type TsBoundingBox = [number, number, number, number];
 
-export interface TsFeature {
-  bbox?: TsBoundingBox;
-  id?: string; // mapbox
-  type: 'Feature';
-  geometry: TsGeometry;
-  properties?: TsProperties | null;
-}
 
-export interface TsFeatureCollection {
-  type: 'FeatureCollection';
-  features: TsFeature[];
-  bbox?: TsBoundingBox;
-}
+
+
 
 interface TsProperties {
-  id?: string,
-  name?: string,
-  status?: [[Date, string]]
+  createdByUserId: string,
+  createdByUserName: string,
+  creationDate: Date,
+  polygonName: string,
+
+  status: [TsPolygonStatus]
 }
+
+interface TsPolygonStatus {
+  timestamp: Date,
+  userId: string,
+  userName: string,
+  status: string,
+  displayColour: string,
+}
+

@@ -1,4 +1,4 @@
-import { TsGeometry } from './../interfaces';
+
 // import { Injectable } from '@angular/core';
 
 // @Injectable({
@@ -13,10 +13,12 @@ import * as globals from 'src/app/shared/globals';
 import { HttpService } from './http.service';
 import { Injectable } from '@angular/core';
 import * as mapboxgl from 'mapbox-gl';
-import { TsCoordinate, TsFeature, TsFeatureCollection, TsBoundingBox, TsMapType } from 'src/app/shared/interfaces';
+import { TsCoordinate, TsFeature, TsBoundingBox, TsMapType } from 'src/app/shared/interfaces';
 import { environment } from 'src/environments/environment';
 // import * as MapboxDraw from 'mapbox-gl-draw';
 import * as MapboxDraw from "@mapbox/mapbox-gl-draw";
+import { DataService } from './data.service';
+import { ActiveLayers } from 'src/app/shared/classes/layers';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +32,7 @@ export class MapService {
     satellite: environment.MAPBOX_STYLE_SATELLITE
   };
   public isDev = !environment.production;
-
+  public layers = new ActiveLayers();
   private drawInstance = new MapboxDraw({
     displayControlsDefault: false,
     controls: {},
@@ -49,18 +51,13 @@ export class MapService {
 
 
   constructor(
-    public http: HttpService
+    public http: HttpService,
+    public data: DataService,
   ) {
     Object.getOwnPropertyDescriptor(mapboxgl, 'accessToken').set(this.mapboxToken);
-    // this.windowWidth = this.screenSize.width;
-    // this.screenSize.resize.subscribe( (newWidth: {width: number, height: number}) => {
-    //   this.windowWidth = newWidth.width;
-    // });
   }
 
-  get context() {
-    return this.tsMap;
-  }
+
 
   newMap(startPosition?: TsCoordinate, startZoom?: number, boundingBox?: TsBoundingBox) {
 
@@ -96,17 +93,31 @@ export class MapService {
           center: mapCentre,
           zoom: mapZoom
         });
+
         this.tsMap.doubleClickZoom.disable();
-        // if ( boundingBox ) {
-        //   this.bounds = boundingBox;
-        // }
 
-
+        this.tsMap.on('moveend', (event) => {
+          console.log(this.getMapBounds())
+          this.data.mapBoundsEmitter.emit( this.getMapBounds() );
+        });
       }
+
+
+      this.tsMap.once('load', () => {
+        resolve(this.tsMap);
+        this.data.mapBoundsEmitter.emit(this.getMapBounds());
+      });
 
     });
 
   }
+
+  public getMapBounds() {
+    const mapBounds = this.tsMap.getBounds();
+    return<TsBoundingBox> [mapBounds.getSouthWest().lng, mapBounds.getSouthWest().lat, mapBounds.getNorthEast().lng, mapBounds.getNorthEast().lat];
+  }
+
+
 
   drawPolygon() {
     return new Promise<TsFeature>((res, rej) => {
@@ -121,21 +132,72 @@ export class MapService {
     this.tsMap.removeControl(this.drawInstance);
   }
 
-  // adds a polygon and deletes the MapboxDraw poygon if the id is supplied
-  addPolygonSource(data) {
+  // polygon is a single TsFeature
+  addPolygons(polys: any) {
 
-    const layerId = data.features[0].id;
-    this.tsMap.addSource(layerId, {type: 'geojson', data});
+    const layerId = 'polygons';
+    console.log(polys);
+    // this.layers.add(layerId);
+    this.tsMap.addSource(layerId, {type: 'geojson', data: polys});
+
+    // Line layer bounding the polygon
     this.tsMap.addLayer({
-      id: layerId,
+      id: layerId + 'line',
       type: 'line',
       source: layerId,
-      paint: {
-        'line-color': '#000',
-        'line-width': 3
+      paint: {'line-color':
+          ['get', 'displayColour',
+            [ 'at',
+              ['-', ['length', ['get', 'status']], 1],
+            ['get', 'status'] ]
+          ],
+        'line-width': 1
       }
     });
 
+    // Fill layer
+    this.tsMap.addLayer({
+      id: layerId + 'fill',
+      type: 'fill',
+      source: layerId,
+      paint: { 'fill-color':
+                ['get', 'displayColour',
+                  [ 'at',
+                    ['-', ['length', ['get', 'status']], 1],
+                  ['get', 'status'] ]
+                ],
+              'fill-opacity': 0.1
+             }
+    });
+
+    // Label layer
+    this.tsMap.addLayer({
+      id: layerId + 'symbol',
+      type: 'symbol',
+      source: layerId,
+      layout: {'text-field':
+                ['get', 'polygonName'],
+               'text-anchor': 'center'
+              }
+    });
+
   }
+
+  removePolygons(layerId: string) {
+    if (this.tsMap.getLayer(layerId + 'line')) {
+      this.tsMap.removeLayer(layerId + 'line');
+    }
+    if (this.tsMap.getLayer(layerId + 'fill')) {
+      this.tsMap.removeLayer(layerId + 'fill');
+    }
+    if (this.tsMap.getLayer(layerId + 'symbol')) {
+      this.tsMap.removeLayer(layerId + 'symbol');
+    }
+    if (this.tsMap.getSource(layerId)) {
+      this.tsMap.removeSource(layerId);
+    }
+
+  }
+
 
 }
